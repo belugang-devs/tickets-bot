@@ -45,6 +45,38 @@
 				}
 			}
 		},
+		"rename": {
+			"description": "Rename a ticket",
+			"name": "rename",
+			"options": {
+				"name": {
+					"description": "The new name of the ticket",
+					"name": "name"
+				}, 
+				"ticket": {
+					"description": "The ticket to rename",
+					"name": "ticket"
+				}
+			},
+			"response": {
+				"renamed": {
+					"description": "%s has been renamed to %s.",
+					"title": "✅ Ticket renamed"
+				},
+				"no_name": {
+					"description": "Please specify a name",
+					"title": "❌ No name"
+				},
+				"no_permission": {
+					"description": "You are not the creator of this ticket and you are not a staff member; you can't rename this ticket.",
+					"title": "❌ Insufficient permission"
+				},
+				"not_a_ticket": {
+					"description": "Please use this command in the ticket channel, or mention the channel.",
+					"title": "❌ This isn't a ticket channel"
+				}
+			}
+		},
 		"blacklist": {
 			"description": "View or modify the blacklist",
 			"name": "blacklist",
