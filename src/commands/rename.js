@@ -85,7 +85,7 @@ module.exports = class RenameCommand extends Command {
 			embeds: [
 				new MessageEmbed()
 					.setColor(settings.success_colour)
-					.setAuthor(member.user.username, member.user.displayAvatarURL())
+					.setAuthor(interaction.member.user.username, interaction.member.user.displayAvatarURL())
 					.setTitle(i18n('commands.rename.response.renamed.title'))
 					.setDescription(i18n('commands.rename.response.renamed.description', channel.name, name))
 					.setFooter(settings.footer, interaction.guild.iconURL())
