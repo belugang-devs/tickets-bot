@@ -319,7 +319,6 @@ module.exports = class CloseCommand extends Command {
 		// 	});
 		// }
 		// handle ticket close button
-		const t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
 		await interaction.reply({
 			components: [
 				new MessageActionRow()
@@ -385,7 +384,7 @@ module.exports = class CloseCommand extends Command {
 						new MessageActionRow()
 							.addComponents(
 								new MessageButton({
-									customId: `ticket_delete:${t_row.id}`,
+									customId: `ticket_delete:${ticket.id}`,
 									style: "DANGER",
 									label: "Delete",
 									emoji: "⛔"
@@ -394,7 +393,7 @@ module.exports = class CloseCommand extends Command {
 					]
 				});
 				if (i.channel.type == "GUILD_TEXT") {
-					await i.channel.permissionOverwrites.edit(t_row.creator, {
+					await i.channel.permissionOverwrites.edit(ticket.creator, {
 						VIEW_CHANNEL: false,
 						SEND_MESSAGES: false
 					})
