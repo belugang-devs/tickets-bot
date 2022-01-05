@@ -267,18 +267,47 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 					await i.deferUpdate();
 
 					if (i.customId === `confirm_close:${interaction.id}`) {
-						await this.client.tickets.close(t_row.id, interaction.user.id, interaction.guild.id);
+						// await this.client.tickets.close(t_row.id, interaction.user.id, interaction.guild.id);
+						// await i.editReply({
+						// 	components: [],
+						// 	embeds: [
+						// 		new MessageEmbed()
+						// 			.setColor(settings.success_colour)
+						// 			.setTitle(i18n('commands.close.response.closed.title', t_row.number))
+						// 			.setDescription(i18n('commands.close.response.closed.description', t_row.number))
+						// 			.setFooter(settings.footer, interaction.guild.iconURL())
+						// 	],
+						// 	ephemeral: true
+						// });
 						await i.editReply({
-							components: [],
+							content: `Ticket closed by <@${i.user.id}>`
+						})
+						await i.channel.send({
+							content: `Ticket closed by <@${i.user.id}>`,
 							embeds: [
 								new MessageEmbed()
-									.setColor(settings.success_colour)
-									.setTitle(i18n('commands.close.response.closed.title', t_row.number))
-									.setDescription(i18n('commands.close.response.closed.description', t_row.number))
-									.setFooter(settings.footer, interaction.guild.iconURL())
+									.setColor("RED")
+									.setDescription("```Support team controls```")
 							],
-							ephemeral: true
+							components: [
+								new MessageActionRow()
+									.addComponents(
+										new MessageButton({
+											customId: `ticket_delete:${t_row.id}`,
+											style: "DANGER",
+											label: "Delete",
+											emoji: "⛔"
+										})
+									)
+							]
 						});
+						if (i.channel.type == "GUILD_TEXT") {
+							await i.channel.permissionOverwrites.edit(t_row.creator, {
+								VIEW_CHANNEL: false,
+								SEND_MESSAGES: false
+							})
+						}
+						
 					} else {
 						await i.editReply({
 							components: [],
@@ -312,6 +341,10 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 						});
 					}
 				});
+			} else if (interaction.customId.startsWith("ticket_delete")) {
+				await interaction.deferUpdate();
+				const t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
+				await this.client.tickets.close(t_row.id, interaction.user.id, interaction.guild.id);
 			}
 		} else if (interaction.isSelectMenu()) {
 			if (interaction.customId.startsWith('panel.multiple')) {
