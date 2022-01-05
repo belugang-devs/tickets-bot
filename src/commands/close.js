@@ -51,272 +51,387 @@ module.exports = class CloseCommand extends Command {
 		const ticket = interaction.options.getInteger(default_i18n('commands.close.options.ticket.name'));
 		const time = interaction.options.getString(default_i18n('commands.close.options.time.name'));
 
-		if (time) {
-			if (!await this.client.utils.isStaff(interaction.member)) {
-				return await interaction.reply({
-					embeds: [
-						new MessageEmbed()
-							.setColor(settings.error_colour)
-							.setTitle(i18n('commands.close.response.no_permission.title'))
-							.setDescription(i18n('commands.close.response.no_permission.description'))
-							.setFooter(settings.footer, interaction.guild.iconURL())
-					],
-					ephemeral: true
-				});
-			}
+		// if (time) {
+		// 	if (!await this.client.utils.isStaff(interaction.member)) {
+		// 		return await interaction.reply({
+		// 			embeds: [
+		// 				new MessageEmbed()
+		// 					.setColor(settings.error_colour)
+		// 					.setTitle(i18n('commands.close.response.no_permission.title'))
+		// 					.setDescription(i18n('commands.close.response.no_permission.description'))
+		// 					.setFooter(settings.footer, interaction.guild.iconURL())
+		// 			],
+		// 			ephemeral: true
+		// 		});
+		// 	}
 
-			let period;
-			try {
-				period = ms(time);
-			} catch {
-				return await interaction.reply({
-					embeds: [
-						new MessageEmbed()
-							.setColor(settings.error_colour)
-							.setTitle(i18n('commands.close.response.invalid_time.title'))
-							.setDescription(i18n('commands.close.response.invalid_time.description'))
-							.setFooter(settings.footer, interaction.guild.iconURL())
-					],
-					ephemeral: true
-				});
-			}
-			const tickets = await this.client.db.models.Ticket.findAndCountAll({
-				where: {
-					guild: interaction.guild.id,
-					last_message: { [Op.lte]: new Date(Date.now() - period) },
-					open: true
-				}
-			});
+		// 	let period;
+		// 	try {
+		// 		period = ms(time);
+		// 	} catch {
+		// 		return await interaction.reply({
+		// 			embeds: [
+		// 				new MessageEmbed()
+		// 					.setColor(settings.error_colour)
+		// 					.setTitle(i18n('commands.close.response.invalid_time.title'))
+		// 					.setDescription(i18n('commands.close.response.invalid_time.description'))
+		// 					.setFooter(settings.footer, interaction.guild.iconURL())
+		// 			],
+		// 			ephemeral: true
+		// 		});
+		// 	}
+		// 	const tickets = await this.client.db.models.Ticket.findAndCountAll({
+		// 		where: {
+		// 			guild: interaction.guild.id,
+		// 			last_message: { [Op.lte]: new Date(Date.now() - period) },
+		// 			open: true
+		// 		}
+		// 	});
 
-			if (tickets.count === 0) {
-				return await interaction.reply({
+		// 	if (tickets.count === 0) {
+		// 		return await interaction.reply({
+		// 			embeds: [
+		// 				new MessageEmbed()
+		// 					.setColor(settings.error_colour)
+		// 					.setTitle(i18n('commands.close.response.no_tickets.title'))
+		// 					.setDescription(i18n('commands.close.response.no_tickets.description'))
+		// 					.setFooter(settings.footer, interaction.guild.iconURL())
+		// 			],
+		// 			ephemeral: true
+		// 		});
+		// 	} else {
+		// 		await interaction.reply({
+		// 			components: [
+		// 				new MessageActionRow()
+		// 					.addComponents(
+		// 						new MessageButton()
+		// 							.setCustomId(`confirm_close_multiple:${interaction.id}`)
+		// 							.setLabel(i18n('commands.close.response.confirm_multiple.buttons.confirm', tickets.count, tickets.count))
+		// 							.setEmoji('✅')
+		// 							.setStyle('SUCCESS')
+		// 					)
+		// 					.addComponents(
+		// 						new MessageButton()
+		// 							.setCustomId(`cancel_close_multiple:${interaction.id}`)
+		// 							.setLabel(i18n('commands.close.response.confirm_multiple.buttons.cancel'))
+		// 							.setEmoji('❌')
+		// 							.setStyle('SECONDARY')
+		// 					)
+		// 			],
+		// 			embeds: [
+		// 				new MessageEmbed()
+		// 					.setColor(settings.colour)
+		// 					.setTitle(i18n('commands.close.response.confirm_multiple.title'))
+		// 					.setDescription(i18n('commands.close.response.confirm_multiple.description', tickets.count, tickets.count))
+		// 					.setFooter(this.client.utils.footer(settings.footer, i18n('collector_expires_in', 30)), interaction.guild.iconURL())
+		// 			],
+		// 			ephemeral: true
+		// 		});
+
+
+		// 		const filter = i => i.user.id === interaction.user.id && i.customId.includes(interaction.id);
+		// 		const collector = interaction.channel.createMessageComponentCollector({
+		// 			filter,
+		// 			time: 30000
+		// 		});
+
+		// 		collector.on('collect', async i => {
+		// 			await i.deferUpdate();
+
+		// 			if (i.customId === `confirm_close_multiple:${interaction.id}`) {
+		// 				for (const ticket of tickets.rows) {
+		// 					await this.client.tickets.close(ticket.id, interaction.user.id, interaction.guild.id, reason);
+		// 				}
+
+		// 				await i.editReply({
+		// 					components: [],
+		// 					embeds: [
+		// 						new MessageEmbed()
+		// 							.setColor(settings.success_colour)
+		// 							.setTitle(i18n('commands.close.response.closed_multiple.title', tickets.count, tickets.count))
+		// 							.setDescription(i18n('commands.close.response.closed_multiple.description', tickets.count, tickets.count))
+		// 							.setFooter(settings.footer, interaction.guild.iconURL())
+		// 					],
+		// 					ephemeral: true
+		// 				});
+		// 			} else {
+		// 				await i.editReply({
+		// 					components: [],
+		// 					embeds: [
+		// 						new MessageEmbed()
+		// 							.setColor(settings.error_colour)
+		// 							.setTitle(i18n('commands.close.response.canceled.title'))
+		// 							.setDescription(i18n('commands.close.response.canceled.description'))
+		// 							.setFooter(settings.footer, interaction.guild.iconURL())
+		// 					],
+		// 					ephemeral: true
+		// 				});
+		// 			}
+
+		// 			collector.stop();
+		// 		});
+
+		// 		collector.on('end', async collected => {
+		// 			if (collected.size === 0) {
+		// 				await interaction.editReply({
+		// 					components: [],
+		// 					embeds: [
+		// 						new MessageEmbed()
+		// 							.setColor(settings.error_colour)
+		// 							.setAuthor(interaction.user.username, interaction.user.displayAvatarURL())
+		// 							.setTitle(i18n('commands.close.response.confirmation_timeout.title'))
+		// 							.setDescription(i18n('commands.close.response.confirmation_timeout.description'))
+		// 							.setFooter(settings.footer, interaction.guild.iconURL())
+		// 					],
+		// 					ephemeral: true
+		// 				});
+		// 			}
+		// 		});
+		// 	}
+		// } else {
+		// 	let t_row;
+		// 	if (ticket) {
+		// 		t_row = await this.client.tickets.resolve(ticket, interaction.guild.id);
+		// 		if (!t_row) {
+		// 			return await interaction.reply({
+		// 				embeds: [
+		// 					new MessageEmbed()
+		// 						.setColor(settings.error_colour)
+		// 						.setTitle(i18n('commands.close.response.unresolvable.title'))
+		// 						.setDescription(i18n('commands.close.response.unresolvable.description', ticket))
+		// 						.setFooter(settings.footer, interaction.guild.iconURL())
+		// 				],
+		// 				ephemeral: true
+		// 			});
+		// 		}
+		// 	} else {
+		// 		t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
+		// 		if (!t_row) {
+		// 			return await interaction.reply({
+		// 				embeds: [
+		// 					new MessageEmbed()
+		// 						.setColor(settings.error_colour)
+		// 						.setTitle(i18n('commands.close.response.not_a_ticket.title'))
+		// 						.setDescription(i18n('commands.close.response.not_a_ticket.description'))
+		// 						.setFooter(settings.footer, interaction.guild.iconURL())
+		// 				],
+		// 				ephemeral: true
+		// 			});
+		// 		}
+		// 	}
+
+		// 	if (t_row.creator !== interaction.member.id && !await this.client.utils.isStaff(interaction.member)) {
+		// 		return await interaction.reply({
+		// 			embeds: [
+		// 				new MessageEmbed()
+		// 					.setColor(settings.error_colour)
+		// 					.setTitle(i18n('commands.close.response.no_permission.title'))
+		// 					.setDescription(i18n('commands.close.response.no_permission.description'))
+		// 					.setFooter(settings.footer, interaction.guild.iconURL())
+		// 			],
+		// 			ephemeral: true
+		// 		});
+		// 	}
+
+		// 	await interaction.reply({
+		// 		components: [
+		// 			new MessageActionRow()
+		// 				.addComponents(
+		// 					new MessageButton()
+		// 						.setCustomId(`confirm_close:${interaction.id}`)
+		// 						.setLabel(i18n('commands.close.response.confirm.buttons.confirm'))
+		// 						.setEmoji('✅')
+		// 						.setStyle('SUCCESS')
+		// 				)
+		// 				.addComponents(
+		// 					new MessageButton()
+		// 						.setCustomId(`cancel_close:${interaction.id}`)
+		// 						.setLabel(i18n('commands.close.response.confirm.buttons.cancel'))
+		// 						.setEmoji('❌')
+		// 						.setStyle('SECONDARY')
+		// 				)
+		// 		],
+		// 		embeds: [
+		// 			new MessageEmbed()
+		// 				.setColor(settings.colour)
+		// 				.setTitle(i18n('commands.close.response.confirm.title'))
+		// 				.setDescription(settings.log_messages ? i18n('commands.close.response.confirm.description_with_archive') : i18n('commands.close.response.confirm.description'))
+		// 				.setFooter(this.client.utils.footer(settings.footer, i18n('collector_expires_in', 30)), interaction.guild.iconURL())
+		// 		],
+		// 		ephemeral: true
+		// 	});
+
+
+		// 	const filter = i => i.user.id === interaction.user.id && i.customId.includes(interaction.id);
+		// 	const collector = interaction.channel.createMessageComponentCollector({
+		// 		filter,
+		// 		time: 30000
+		// 	});
+
+		// 	collector.on('collect', async i => {
+		// 		await i.deferUpdate();
+
+		// 		if (i.customId === `confirm_close:${interaction.id}`) {
+		// 			await this.client.tickets.close(t_row.id, interaction.user.id, interaction.guild.id, reason);
+		// 			await i.editReply({
+		// 				components: [],
+		// 				embeds: [
+		// 					new MessageEmbed()
+		// 						.setColor(settings.success_colour)
+		// 						.setTitle(i18n('commands.close.response.closed.title', t_row.number))
+		// 						.setDescription(i18n('commands.close.response.closed.description', t_row.number))
+		// 						.setFooter(settings.footer, interaction.guild.iconURL())
+		// 				],
+		// 				ephemeral: true
+		// 			});
+		// 		} else {
+		// 			await i.editReply({
+		// 				components: [],
+		// 				embeds: [
+		// 					new MessageEmbed()
+		// 						.setColor(settings.error_colour)
+		// 						.setTitle(i18n('commands.close.response.canceled.title'))
+		// 						.setDescription(i18n('commands.close.response.canceled.description'))
+		// 						.setFooter(settings.footer, interaction.guild.iconURL())
+		// 				],
+		// 				ephemeral: true
+		// 			});
+		// 		}
+
+		// 		collector.stop();
+		// 	});
+
+		// 	collector.on('end', async collected => {
+		// 		if (collected.size === 0) {
+		// 			await interaction.editReply({
+		// 				components: [],
+		// 				embeds: [
+		// 					new MessageEmbed()
+		// 						.setColor(settings.error_colour)
+		// 						.setAuthor(interaction.user.username, interaction.user.displayAvatarURL())
+		// 						.setTitle(i18n('commands.close.response.confirmation_timeout.title'))
+		// 						.setDescription(i18n('commands.close.response.confirmation_timeout.description'))
+		// 						.setFooter(settings.footer, interaction.guild.iconURL())
+		// 				],
+		// 				ephemeral: true
+		// 			});
+		// 		}
+		// 	});
+		// }
+		// handle ticket close button
+		const t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
+		await interaction.reply({
+			components: [
+				new MessageActionRow()
+					.addComponents(
+						new MessageButton()
+							.setCustomId(`confirm_close:${interaction.id}`)
+							.setLabel(i18n('commands.close.response.confirm.buttons.confirm'))
+							.setEmoji('✅')
+							.setStyle('SUCCESS')
+					)
+					.addComponents(
+						new MessageButton()
+							.setCustomId(`cancel_close:${interaction.id}`)
+							.setLabel(i18n('commands.close.response.confirm.buttons.cancel'))
+							.setEmoji('❌')
+							.setStyle('SECONDARY')
+					)
+			],
+			embeds: [
+				new MessageEmbed()
+					.setColor(settings.colour)
+					.setTitle(i18n('commands.close.response.confirm.title'))
+					.setDescription(settings.log_messages ? i18n('commands.close.response.confirm.description_with_archive') : i18n('commands.close.response.confirm.description'))
+					.setFooter(this.client.utils.footer(settings.footer, i18n('collector_expires_in', 30)), interaction.guild.iconURL())
+			],
+			ephemeral: true
+		});
+
+
+		const filter = i => i.user.id === interaction.user.id && i.customId.includes(interaction.id);
+		const collector = interaction.channel.createMessageComponentCollector({
+			filter,
+			time: 30000
+		});
+
+		collector.on('collect', async i => {
+			await i.deferUpdate();
+
+			if (i.customId === `confirm_close:${interaction.id}`) {
+				// await this.client.tickets.close(t_row.id, interaction.user.id, interaction.guild.id);
+				// await i.editReply({
+				// 	components: [],
+				// 	embeds: [
+				// 		new MessageEmbed()
+				// 			.setColor(settings.success_colour)
+				// 			.setTitle(i18n('commands.close.response.closed.title', t_row.number))
+				// 			.setDescription(i18n('commands.close.response.closed.description', t_row.number))
+				// 			.setFooter(settings.footer, interaction.guild.iconURL())
+				// 	],
+				// 	ephemeral: true
+				// });
+				await i.editReply({
+					content: `Ticket closed by <@${i.user.id}>`
+				})
+				await i.channel.send({
+					content: `Ticket closed by <@${i.user.id}>`,
 					embeds: [
 						new MessageEmbed()
-							.setColor(settings.error_colour)
-							.setTitle(i18n('commands.close.response.no_tickets.title'))
-							.setDescription(i18n('commands.close.response.no_tickets.description'))
-							.setFooter(settings.footer, interaction.guild.iconURL())
+							.setColor("RED")
+							.setDescription("```Support team controls```")
 					],
-					ephemeral: true
-				});
-			} else {
-				await interaction.reply({
 					components: [
 						new MessageActionRow()
 							.addComponents(
-								new MessageButton()
-									.setCustomId(`confirm_close_multiple:${interaction.id}`)
-									.setLabel(i18n('commands.close.response.confirm_multiple.buttons.confirm', tickets.count, tickets.count))
-									.setEmoji('✅')
-									.setStyle('SUCCESS')
+								new MessageButton({
+									customId: `ticket_delete:${t_row.id}`,
+									style: "DANGER",
+									label: "Delete",
+									emoji: "⛔"
+								})
 							)
-							.addComponents(
-								new MessageButton()
-									.setCustomId(`cancel_close_multiple:${interaction.id}`)
-									.setLabel(i18n('commands.close.response.confirm_multiple.buttons.cancel'))
-									.setEmoji('❌')
-									.setStyle('SECONDARY')
-							)
-					],
-					embeds: [
-						new MessageEmbed()
-							.setColor(settings.colour)
-							.setTitle(i18n('commands.close.response.confirm_multiple.title'))
-							.setDescription(i18n('commands.close.response.confirm_multiple.description', tickets.count, tickets.count))
-							.setFooter(this.client.utils.footer(settings.footer, i18n('collector_expires_in', 30)), interaction.guild.iconURL())
-					],
-					ephemeral: true
+					]
 				});
-
-
-				const filter = i => i.user.id === interaction.user.id && i.customId.includes(interaction.id);
-				const collector = interaction.channel.createMessageComponentCollector({
-					filter,
-					time: 30000
-				});
-
-				collector.on('collect', async i => {
-					await i.deferUpdate();
-
-					if (i.customId === `confirm_close_multiple:${interaction.id}`) {
-						for (const ticket of tickets.rows) {
-							await this.client.tickets.close(ticket.id, interaction.user.id, interaction.guild.id, reason);
-						}
-
-						await i.editReply({
-							components: [],
-							embeds: [
-								new MessageEmbed()
-									.setColor(settings.success_colour)
-									.setTitle(i18n('commands.close.response.closed_multiple.title', tickets.count, tickets.count))
-									.setDescription(i18n('commands.close.response.closed_multiple.description', tickets.count, tickets.count))
-									.setFooter(settings.footer, interaction.guild.iconURL())
-							],
-							ephemeral: true
-						});
-					} else {
-						await i.editReply({
-							components: [],
-							embeds: [
-								new MessageEmbed()
-									.setColor(settings.error_colour)
-									.setTitle(i18n('commands.close.response.canceled.title'))
-									.setDescription(i18n('commands.close.response.canceled.description'))
-									.setFooter(settings.footer, interaction.guild.iconURL())
-							],
-							ephemeral: true
-						});
-					}
-
-					collector.stop();
-				});
-
-				collector.on('end', async collected => {
-					if (collected.size === 0) {
-						await interaction.editReply({
-							components: [],
-							embeds: [
-								new MessageEmbed()
-									.setColor(settings.error_colour)
-									.setAuthor(interaction.user.username, interaction.user.displayAvatarURL())
-									.setTitle(i18n('commands.close.response.confirmation_timeout.title'))
-									.setDescription(i18n('commands.close.response.confirmation_timeout.description'))
-									.setFooter(settings.footer, interaction.guild.iconURL())
-							],
-							ephemeral: true
-						});
-					}
-				});
-			}
-		} else {
-			let t_row;
-			if (ticket) {
-				t_row = await this.client.tickets.resolve(ticket, interaction.guild.id);
-				if (!t_row) {
-					return await interaction.reply({
-						embeds: [
-							new MessageEmbed()
-								.setColor(settings.error_colour)
-								.setTitle(i18n('commands.close.response.unresolvable.title'))
-								.setDescription(i18n('commands.close.response.unresolvable.description', ticket))
-								.setFooter(settings.footer, interaction.guild.iconURL())
-						],
-						ephemeral: true
-					});
+				if (i.channel.type == "GUILD_TEXT") {
+					await i.channel.permissionOverwrites.edit(t_row.creator, {
+						VIEW_CHANNEL: false,
+						SEND_MESSAGES: false
+					})
 				}
+				
 			} else {
-				t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
-				if (!t_row) {
-					return await interaction.reply({
-						embeds: [
-							new MessageEmbed()
-								.setColor(settings.error_colour)
-								.setTitle(i18n('commands.close.response.not_a_ticket.title'))
-								.setDescription(i18n('commands.close.response.not_a_ticket.description'))
-								.setFooter(settings.footer, interaction.guild.iconURL())
-						],
-						ephemeral: true
-					});
-				}
-			}
-
-			if (t_row.creator !== interaction.member.id && !await this.client.utils.isStaff(interaction.member)) {
-				return await interaction.reply({
+				await i.editReply({
+					components: [],
 					embeds: [
 						new MessageEmbed()
 							.setColor(settings.error_colour)
-							.setTitle(i18n('commands.close.response.no_permission.title'))
-							.setDescription(i18n('commands.close.response.no_permission.description'))
+							.setTitle(i18n('commands.close.response.canceled.title'))
+							.setDescription(i18n('commands.close.response.canceled.description'))
 							.setFooter(settings.footer, interaction.guild.iconURL())
 					],
 					ephemeral: true
 				});
 			}
 
-			await interaction.reply({
-				components: [
-					new MessageActionRow()
-						.addComponents(
-							new MessageButton()
-								.setCustomId(`confirm_close:${interaction.id}`)
-								.setLabel(i18n('commands.close.response.confirm.buttons.confirm'))
-								.setEmoji('✅')
-								.setStyle('SUCCESS')
-						)
-						.addComponents(
-							new MessageButton()
-								.setCustomId(`cancel_close:${interaction.id}`)
-								.setLabel(i18n('commands.close.response.confirm.buttons.cancel'))
-								.setEmoji('❌')
-								.setStyle('SECONDARY')
-						)
-				],
-				embeds: [
-					new MessageEmbed()
-						.setColor(settings.colour)
-						.setTitle(i18n('commands.close.response.confirm.title'))
-						.setDescription(settings.log_messages ? i18n('commands.close.response.confirm.description_with_archive') : i18n('commands.close.response.confirm.description'))
-						.setFooter(this.client.utils.footer(settings.footer, i18n('collector_expires_in', 30)), interaction.guild.iconURL())
-				],
-				ephemeral: true
-			});
+			collector.stop();
+		});
 
-
-			const filter = i => i.user.id === interaction.user.id && i.customId.includes(interaction.id);
-			const collector = interaction.channel.createMessageComponentCollector({
-				filter,
-				time: 30000
-			});
-
-			collector.on('collect', async i => {
-				await i.deferUpdate();
-
-				if (i.customId === `confirm_close:${interaction.id}`) {
-					await this.client.tickets.close(t_row.id, interaction.user.id, interaction.guild.id, reason);
-					await i.editReply({
-						components: [],
-						embeds: [
-							new MessageEmbed()
-								.setColor(settings.success_colour)
-								.setTitle(i18n('commands.close.response.closed.title', t_row.number))
-								.setDescription(i18n('commands.close.response.closed.description', t_row.number))
-								.setFooter(settings.footer, interaction.guild.iconURL())
-						],
-						ephemeral: true
-					});
-				} else {
-					await i.editReply({
-						components: [],
-						embeds: [
-							new MessageEmbed()
-								.setColor(settings.error_colour)
-								.setTitle(i18n('commands.close.response.canceled.title'))
-								.setDescription(i18n('commands.close.response.canceled.description'))
-								.setFooter(settings.footer, interaction.guild.iconURL())
-						],
-						ephemeral: true
-					});
-				}
-
-				collector.stop();
-			});
-
-			collector.on('end', async collected => {
-				if (collected.size === 0) {
-					await interaction.editReply({
-						components: [],
-						embeds: [
-							new MessageEmbed()
-								.setColor(settings.error_colour)
-								.setAuthor(interaction.user.username, interaction.user.displayAvatarURL())
-								.setTitle(i18n('commands.close.response.confirmation_timeout.title'))
-								.setDescription(i18n('commands.close.response.confirmation_timeout.description'))
-								.setFooter(settings.footer, interaction.guild.iconURL())
-						],
-						ephemeral: true
-					});
-				}
-			});
-		}
+		collector.on('end', async collected => {
+			if (collected.size === 0) {
+				await interaction.editReply({
+					components: [],
+					embeds: [
+						new MessageEmbed()
+							.setColor(settings.error_colour)
+							.setAuthor(interaction.user.username, interaction.user.displayAvatarURL())
+							.setTitle(i18n('commands.close.response.confirmation_timeout.title'))
+							.setDescription(i18n('commands.close.response.confirmation_timeout.description'))
+							.setFooter(settings.footer, interaction.guild.iconURL())
+					],
+					ephemeral: true
+				});
+			}
+		});
 	}
 };
