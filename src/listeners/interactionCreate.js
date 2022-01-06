@@ -382,6 +382,7 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				const t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
 				await this.client.tickets.close(t_row.id, interaction.user.id, interaction.guild.id);
 			} else if (interaction.customId.startsWith("ticket_reopen")) {
+				this.client.log.error("PAT")
 				await interaction.deferUpdate();
 				const pinned = await channel.messages.fetchPinned();
 				const t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
