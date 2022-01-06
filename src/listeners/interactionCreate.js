@@ -90,18 +90,43 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				}
 			} else {
 				try {
-					const t_row = await this.client.tickets.create(interaction.guild.id, interaction.user.id, id);
+					// const t_row = await this.client.tickets.create(interaction.guild.id, interaction.user.id, id);
+					// return interaction.reply({
+					// 	embeds: [
+					// 		new MessageEmbed()
+					// 			.setColor(settings.success_colour)
+					// 			.setAuthor(interaction.user.username, interaction.user.displayAvatarURL())
+					// 			.setTitle(i18n('commands.new.response.created.title'))
+					// 			.setDescription(i18n('commands.new.response.created.description', `<#${t_row.id}>`))
+					// 			.setFooter(settings.footer, interaction.guild.iconURL())
+					// 	],
+					// 	ephemeral: true
+					// });
 					return interaction.reply({
 						embeds: [
 							new MessageEmbed()
-								.setColor(settings.success_colour)
+								.setColor("YELLOW")
 								.setAuthor(interaction.user.username, interaction.user.displayAvatarURL())
-								.setTitle(i18n('commands.new.response.created.title'))
-								.setDescription(i18n('commands.new.response.created.description', `<#${t_row.id}>`))
+								.setTitle(i18n('commands.new.response.confirm.title'))
+								.setDescription(i18n('commands.new.response.confirm.description'))
 								.setFooter(settings.footer, interaction.guild.iconURL())
 						],
+						components: [
+							new MessageActionRow()
+								.addComponents(
+									new MessageButton()
+										.setCustomId(`new_confirm:${id}`)
+										.setLabel("Confirm")
+										.setStyle("SECONDARY")										
+								).addComponents(
+									new MessageButton()
+										.setCustomId(`new_cancel`)
+										.setLabel("Cancel")
+										.setStyle("SECONDARY")										
+								)
+						],
 						ephemeral: true
-					});
+					})
 				} catch (error) {
 					this.client.log.error(error);
 					return interaction.reply({
@@ -376,6 +401,73 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				content: `Ticket reopened by <@${interaction.user.id}>`
 			})
 			await interaction.message.delete()
+			}
+			else if(interaction.customId.startsWith("new_confirm")) {
+				try {
+					const id = interaction.customId.split(":")[1]
+					const t_row = await this.client.tickets.create(interaction.guild.id, interaction.user.id, id);
+					return interaction.update({
+						data: {
+						embeds: [
+							new MessageEmbed()
+								.setColor(settings.success_colour)
+								.setAuthor(interaction.user.username, interaction.user.displayAvatarURL())
+								.setTitle(i18n('commands.new.response.created.title'))
+								.setDescription(i18n('commands.new.response.created.description', `<#${t_row.id}>`))
+								.setFooter(settings.footer, interaction.guild.iconURL())
+						],
+						components: []
+					},
+						ephemeral: true
+					});
+					// return interaction.reply({
+					// 	embeds: [
+					// 		new MessageEmbed()
+					// 			.setColor("YELLOW")
+					// 			.setAuthor(interaction.user.username, interaction.user.displayAvatarURL())
+					// 			.setTitle(i18n('commands.new.response.confirm.title'))
+					// 			.setDescription(i18n('commands.new.response.confirm.description'))
+					// 			.setFooter(settings.footer, interaction.guild.iconURL())
+					// 	],
+					// 	components: [
+					// 		new MessageActionRow()
+					// 			.addComponents(
+					// 				new MessageButton()
+					// 					.setCustomId(`new_confirm:${interaction.guild.id}:${interaction.user.id}:${id}`)
+					// 					.setLabel("Confirm")
+					// 					.setStyle("SECONDARY")										
+					// 			).addComponents(
+					// 				new MessageButton()
+					// 					.setCustomId(`new_cancel`)
+					// 					.setLabel("Cancel")
+					// 					.setStyle("SECONDARY")										
+					// 			)
+					// 	],
+					// 	ephemeral: true
+					// })
+				} catch (error) {
+					this.client.log.error(error);
+					return interaction.reply({
+						embeds: [
+							new MessageEmbed()
+								.setColor(settings.error_colour)
+								.setAuthor(interaction.user.username, interaction.user.displayAvatarURL())
+								.setTitle(i18n('commands.new.response.error.title'))
+								.setDescription(error.message)
+								.setFooter(settings.footer, interaction.guild.iconURL())
+						],
+						ephemeral: true
+					});
+				}
+			} else if(interaction.customId.startsWith("new_cancel")) {
+				await interaction.update({
+					data: {
+						content: "Cancelled the ticket",
+						components: [],
+						embeds: []
+					},
+					ephemeral: true
+				})
 			}
 		} else if (interaction.isSelectMenu()) {
 			if (interaction.customId.startsWith('panel.multiple')) {

@@ -257,6 +257,10 @@
 				"title": "⚠️ Ticket topic"
 			},
 			"response": {
+				"confirm": {
+					"description": "Are you sure you want to make a ticket?",
+					"title": "Confirm ticket"
+				},
 				"created": {
 					"description": "Your ticket has been created: %s.",
 					"title": "✅ Ticket created"
