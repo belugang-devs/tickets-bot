@@ -228,6 +228,9 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 			} else if (interaction.customId.startsWith('ticket.close')) {
 				// handle ticket close button
 				const t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
+				if (!await this.client.utils.isStaff(interaction.member)) {
+					return
+				}
 				await interaction.reply({
 					components: [
 						new MessageActionRow()

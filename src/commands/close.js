@@ -319,6 +319,38 @@ module.exports = class CloseCommand extends Command {
 		// 	});
 		// }
 		// handle ticket close button
+		if (!await this.client.utils.isStaff(interaction.member)) {
+			return
+		}
+		let t_row;
+			if (ticket) {
+				t_row = await this.client.tickets.resolve(ticket, interaction.guild.id);
+				if (!t_row) {
+					return await interaction.reply({
+						embeds: [
+							new MessageEmbed()
+								.setColor(settings.error_colour)
+								.setTitle(i18n('commands.close.response.unresolvable.title'))
+								.setDescription(i18n('commands.close.response.unresolvable.description', ticket))
+								.setFooter(settings.footer, interaction.guild.iconURL())
+						],
+						ephemeral: true
+					});
+				}
+			} else {
+				t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
+				if (!t_row) {
+					return await interaction.reply({
+						embeds: [
+							new MessageEmbed()
+								.setColor(settings.error_colour)
+								.setTitle(i18n('commands.close.response.not_a_ticket.title'))
+								.setDescription(i18n('commands.close.response.not_a_ticket.description'))
+								.setFooter(settings.footer, interaction.guild.iconURL())
+						],
+						ephemeral: true
+					});
+				}}
 		await interaction.reply({
 			components: [
 				new MessageActionRow()
@@ -384,7 +416,7 @@ module.exports = class CloseCommand extends Command {
 						new MessageActionRow()
 							.addComponents(
 								new MessageButton({
-									customId: `ticket_delete:${ticket.id}`,
+									customId: `ticket_delete:${t_rw.id}`,
 									style: "DANGER",
 									label: "Delete",
 									emoji: "⛔"
@@ -393,7 +425,7 @@ module.exports = class CloseCommand extends Command {
 					]
 				});
 				if (i.channel.type == "GUILD_TEXT") {
-					await i.channel.permissionOverwrites.edit(ticket.creator, {
+					await i.channel.permissionOverwrites.edit(t_rw.creator, {
 						VIEW_CHANNEL: false,
 						SEND_MESSAGES: false
 					})
