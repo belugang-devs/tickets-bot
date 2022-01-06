@@ -302,6 +302,14 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 											emoji: "⛔"
 										})
 									)
+									.addComponents(
+										new MessageButton({
+											customId: `ticket_reopen:${t_row.id}`,
+											style: "SUCCESS",
+											label: "Open",
+											emoji: "🔓"
+										})
+									)
 							]
 						});
 						if (i.channel.type == "GUILD_TEXT") {
@@ -348,6 +356,26 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				await interaction.deferUpdate();
 				const t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
 				await this.client.tickets.close(t_row.id, interaction.user.id, interaction.guild.id);
+			} else if (interaction.customId.startsWith("ticket_repon")) {
+				await interaction.deferUpdate();
+				const pinned = await channel.messages.fetchPinned();
+				const t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
+			await t_row.update({
+				closed_by: null,
+				closed_reason: null,
+				open: true,
+				pinned_messages: [...pinned.keys()]
+			});
+			if (interaction.channel.type == "GUILD_TEXT") {
+				await interaction.channel.permissionOverwrites.edit(t_row.creator, {
+					VIEW_CHANNEL: true,
+					SEND_MESSAGES: true
+				})
+			}
+			await interaction.editReply({
+				content: `Ticket reopened by <@${interaction.user.id}>`
+			})
+			await interaction.message.delete()
 			}
 		} else if (interaction.isSelectMenu()) {
 			if (interaction.customId.startsWith('panel.multiple')) {

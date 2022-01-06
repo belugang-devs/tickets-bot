@@ -416,16 +416,24 @@ module.exports = class CloseCommand extends Command {
 						new MessageActionRow()
 							.addComponents(
 								new MessageButton({
-									customId: `ticket_delete:${t_rw.id}`,
+									customId: `ticket_delete:${t_row.id}`,
 									style: "DANGER",
 									label: "Delete",
 									emoji: "⛔"
 								})
 							)
+							.addComponents(
+								new MessageButton({
+									customId: `ticket_reopen:${t_row.id}`,
+									style: "SUCCESS",
+									label: "Open",
+									emoji: "🔓"
+								})
+							)
 					]
 				});
 				if (i.channel.type == "GUILD_TEXT") {
-					await i.channel.permissionOverwrites.edit(t_rw.creator, {
+					await i.channel.permissionOverwrites.edit(t_rpw.creator, {
 						VIEW_CHANNEL: false,
 						SEND_MESSAGES: false
 					})
