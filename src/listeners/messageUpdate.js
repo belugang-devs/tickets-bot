@@ -10,7 +10,7 @@ module.exports = class MessageUpdateEventListener extends EventListener {
 			try {
 				await newm.fetch();
 			} catch (error) {
-				return this.client.log.error(error);
+				return;
 			}
 		}
 
