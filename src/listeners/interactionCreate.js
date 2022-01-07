@@ -255,7 +255,8 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				const t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
 				if (!await this.client.utils.isStaff(interaction.member)) {
 					return await interaction.reply({
-						content: "Only staff can close the ticket, please let us know if you want the ticket to be closed"
+						content: "Only staff can close the ticket, please let us know if you want the ticket to be closed",
+						ephe
 					})
 				}
 				await interaction.reply({
