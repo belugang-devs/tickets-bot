@@ -387,10 +387,9 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 			}
 			else if(interaction.customId.startsWith("new_confirm")) {
 				try {
-					await interaction.message.delete()
 					const id = interaction.customId.split(":")[1]
 					const t_row = await this.client.tickets.create(interaction.guild.id, interaction.user.id, id);
-					return await interaction.update({
+					await interaction.editReply({
 						data: {
 						embeds: [
 							new MessageEmbed()
@@ -444,7 +443,7 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 					});
 				}
 			} else if(interaction.customId.startsWith("new_cancel")) {
-				await interaction.update({
+				await interaction.editReply({
 					data: {
 						content: "Cancelled the ticket",
 						components: [],
