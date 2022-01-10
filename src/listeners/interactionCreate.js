@@ -53,8 +53,8 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				}
 			});
 
-			if (tickets.count >= cat_row.max_per_member) {
-				if (cat_row.max_per_member === 1) {
+			if (tickets.count >= 1) {
+				if (!(await this.client.utils.isStaff(interaction.member))) {
 					return interaction.reply({
 						embeds: [
 							new MessageEmbed()
@@ -62,27 +62,6 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 								.setAuthor(interaction.user.username, interaction.user.displayAvatarURL())
 								.setTitle(i18n('commands.new.response.has_a_ticket.title'))
 								.setDescription(i18n('commands.new.response.has_a_ticket.description', tickets.rows[0].id))
-								.setFooter(settings.footer, interaction.guild.iconURL())
-						],
-						ephemeral: true
-					});
-				} else {
-					const list = tickets.rows.map(row => {
-						if (row.topic) {
-							const description = row.topic.substring(0, 30);
-							const ellipses = row.topic.length > 30 ? '...' : '';
-							return `<#${row.id}>: \`${description}${ellipses}\``;
-						} else {
-							return `<#${row.id}>`;
-						}
-					});
-					return interaction.reply({
-						embeds: [
-							new MessageEmbed()
-								.setColor(settings.error_colour)
-								.setAuthor(interaction.user.username, interaction.user.displayAvatarURL())
-								.setTitle(i18n('commands.new.response.max_tickets.title', tickets.count))
-								.setDescription(i18n('commands.new.response.max_tickets.description', list.join('\n')))
 								.setFooter(settings.footer, interaction.guild.iconURL())
 						],
 						ephemeral: true
@@ -408,9 +387,10 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 			}
 			else if(interaction.customId.startsWith("new_confirm")) {
 				try {
+					await interaction.message.delete()
 					const id = interaction.customId.split(":")[1]
 					const t_row = await this.client.tickets.create(interaction.guild.id, interaction.user.id, id);
-					return interaction.update({
+					return await interaction.update({
 						data: {
 						embeds: [
 							new MessageEmbed()
