@@ -3,7 +3,9 @@ const {
 	Interaction, // eslint-disable-line no-unused-vars
 	MessageActionRow,
 	MessageButton,
-	MessageEmbed
+	MessageEmbed,
+	DiscordAPIError,
+	MessagePayload
 } = require('discord.js');
 
 module.exports = class InteractionCreateEventListener extends EventListener {
@@ -390,7 +392,6 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 					const id = interaction.customId.split(":")[1]
 					const t_row = await this.client.tickets.create(interaction.guild.id, interaction.user.id, id);
 					await interaction.editReply({
-						data: {
 						embeds: [
 							new MessageEmbed()
 								.setColor(settings.success_colour)
@@ -400,8 +401,6 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 								.setFooter(settings.footer, interaction.guild.iconURL())
 						],
 						components: []
-					},
-						ephemeral: true
 					});
 					// return interaction.reply({
 					// 	embeds: [
@@ -444,12 +443,9 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				}
 			} else if(interaction.customId.startsWith("new_cancel")) {
 				await interaction.editReply({
-					data: {
 						content: "Cancelled the ticket",
 						components: [],
 						embeds: []
-					},
-					ephemeral: true
 				})
 			}
 		} else if (interaction.isSelectMenu()) {
