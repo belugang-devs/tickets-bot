@@ -69,8 +69,8 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 						ephemeral: true
 					});
 				}
-			} else {
-				try {
+			} 
+							try {
 					// const t_row = await this.client.tickets.create(interaction.guild.id, interaction.user.id, id);
 					// return interaction.reply({
 					// 	embeds: [
@@ -122,7 +122,7 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 						ephemeral: true
 					});
 				}
-			}
+			
 		};
 
 		if (interaction.isCommand()) {
@@ -389,6 +389,8 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 			}
 			else if(interaction.customId.startsWith("new_confirm")) {
 				try {
+					await interaction.deferUpdate()
+					console.log(interaction.message)
 					const id = interaction.customId.split(":")[1]
 					const t_row = await this.client.tickets.create(interaction.guild.id, interaction.user.id, id);
 					await interaction.editReply({
@@ -442,6 +444,7 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 					});
 				}
 			} else if(interaction.customId.startsWith("new_cancel")) {
+				await interaction.deferUpdate()
 				await interaction.editReply({
 						content: "Cancelled the ticket",
 						components: [],
