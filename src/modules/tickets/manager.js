@@ -208,6 +208,22 @@ module.exports = class TicketManager extends EventEmitter {
 								.setFooter(settings.footer, guild.iconURL())
 						]
 					});
+					
+					const filter = message => message.author.id === t_row.creator;
+					const timeout = t_channel.createMessageCollector({
+						filter,
+						max: 1, 
+						time: 1 * 60 * 1000 // Minutes * (60 seconds) * (1000 millisecond) = milliseconds
+					})
+
+					timeout.on("collect", (_message) => {
+						timeout.stop("br")
+					})
+					timeout.on("end", (_collected, reason) => {
+						if (reason !== "br") {
+							await t_channel.delete("User did not respond within given time")
+						}
+					})
 				}
 			}
 		})();
