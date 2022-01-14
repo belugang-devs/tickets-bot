@@ -237,7 +237,7 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				if (!await this.client.utils.isStaff(interaction.member)) {
 					return await interaction.reply({
 						content: "Only staff can close the ticket, please let us know if you want the ticket to be closed",
-						ephe
+						ephemeral: true
 					})
 				}
 				await interaction.reply({
