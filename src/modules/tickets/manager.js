@@ -216,10 +216,10 @@ module.exports = class TicketManager extends EventEmitter {
 						time: 1 * 60 * 1000 // Minutes * (60 seconds) * (1000 millisecond) = milliseconds
 					})
 
-					timeout.on("collect", (_message) => {
+					timeout.on("collect", async (_message) => {
 						timeout.stop("br")
 					})
-					timeout.on("end", (_collected, reason) => {
+					timeout.on("end", async (_collected, reason) => {
 						if (reason !== "br") {
 							await t_channel.delete("User did not respond within given time")
 						}
